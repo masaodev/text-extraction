@@ -3,8 +3,10 @@ plugins {
 }
 apply plugin: 'java-library'
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
-
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 mainClassName = 'text.extraction.Application'
 
@@ -25,6 +27,21 @@ dependencies {
   api group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
   api group: 'commons-io', name: 'commons-io', version: '2.6'
   api group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+}
+
+eclipse.project {
+    buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+    natures 'org.eclipse.buildship.core.gradleprojectnature'
+}
+
+tasks.eclipse.doFirst {
+    File prefs = file(".settings/org.eclipse.buildship.core.prefs")
+    if(!prefs.exists()){
+        prefs.append('''
+            connection.project.dir=
+            eclipse.preferences.version=1
+            '''.stripIndent())
+    }
 }
 
 spotless {
