@@ -8,7 +8,7 @@ apply plugin: 'eclipse'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-mainClassName = 'text.extraction.Application'
+mainClassName = 'net.masaodev.text.extraction.Application'
 
 startScripts {
   applicationName = 'text-extraction'
