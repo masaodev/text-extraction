@@ -26,6 +26,7 @@ dependencies {
   api group: 'org.apache.poi', name: 'poi', version: '4.1.1'
   api group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
   api group: 'commons-io', name: 'commons-io', version: '2.6'
+  api group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
   api group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 }
 

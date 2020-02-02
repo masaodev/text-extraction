@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,16 +13,22 @@ public class Application {
   private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
   public static void main(String[] args) throws IOException {
-    logger.info("対象ディレクトリルート:{}", args[0]);
-    logger.info("出力先:{}", args[1]);
+    String targetDir = args[0];
+    String outputDir = args[1];
+    logger.info("対象ディレクトリルート:{}", targetDir);
+    logger.info("出力先:{}", outputDir);
 
-    Collection<File> searchExcelFiles = ExcelUtil.searchExcelFiles(args[0]);
+    Collection<File> searchExcelFiles = ExcelUtil.searchExcelFiles(targetDir);
 
-    int i = 0;
-    for (File file : searchExcelFiles) {
-      i++;
-      String str = ExcelUtil.extractStringFromExcelBook(file);
-      FileUtils.writeStringToFile(new File(args[1], i + ".txt"), str, "utf-8");
+    for (File targetFile : searchExcelFiles) {
+      String str = ExcelUtil.extractStringFromExcelBook(targetFile);
+
+      String destFilePath = targetFile.getAbsolutePath().replace(targetDir, outputDir);
+      String parentPath = FilenameUtils.getFullPath(destFilePath);
+      File parent = new File(parentPath);
+      parent.mkdirs();
+
+      FileUtils.writeStringToFile(new File(parent, targetFile.getName() + ".txt"), str, "utf-8");
     }
   }
 }

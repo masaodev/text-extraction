@@ -8,11 +8,18 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.hssf.usermodel.HSSFShapeGroup;
+import org.apache.poi.hssf.usermodel.HSSFSimpleShape;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Shape;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFShapeGroup;
+import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +50,7 @@ public class ExcelUtil {
     // シート枚数分ループ処理
     workbook.forEach(
         sheet -> {
-          s.append(sheet.getSheetName() + "\r\n");
+          s.append("【Sheet】:" + sheet.getSheetName() + "\r\n");
           // 最終行までループ処理
           sheet.forEach(
               row -> {
@@ -60,6 +67,14 @@ public class ExcelUtil {
                       }
                     });
               });
+          Drawing<?> createDrawingPatriarch = sheet.createDrawingPatriarch();
+          s.append("【Shape】\r\n");
+          for (Shape shape : createDrawingPatriarch) {
+            String shapeString = handleShape(shape);
+            if (StringUtils.isNotBlank(shapeString)) {
+              s.append("Shape:" + shapeString + "\r\n");
+            }
+          }
         });
     try {
       workbook.close();
@@ -136,5 +151,31 @@ public class ExcelUtil {
             .collect(Collectors.toList());
 
     return listFiles;
+  }
+
+  // オートシェイプを処理するメソッド
+  private static String handleShape(Object d) {
+    String s = "";
+    try {
+      // shapeの処理(XLSX形式)
+      if (d instanceof XSSFSimpleShape) {
+        s = ((XSSFSimpleShape) d).getText();
+      }
+      // shapeの処理(XLS形式)
+      if (d instanceof HSSFSimpleShape) {
+        s = ((HSSFSimpleShape) d).getString().getString();
+      }
+      // グループ化されたshapeの処理(XLSX形式)
+      if (d instanceof XSSFShapeGroup) {
+        ((XSSFShapeGroup) d).forEach(gs -> handleShape(gs));
+      }
+      // グループ化されたshapeの処理(XLS形式)
+      if (d instanceof HSSFShapeGroup) {
+        ((HSSFShapeGroup) d).forEach(gs -> handleShape(gs));
+      }
+    } catch (Exception e) {
+      logger.error("error", e);
+    }
+    return s;
   }
 }
