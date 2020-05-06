@@ -14,21 +14,35 @@ public class Application {
 
   public static void main(String[] args) throws IOException {
     String targetDir = args[0];
-    String outputDir = args[1];
+    String outputDir = null;
+    if (args.length >= 2) {
+      outputDir = args[1];
+    }
+
     logger.info("対象ディレクトリルート:{}", targetDir);
     logger.info("出力先:{}", outputDir);
 
-    Collection<File> searchExcelFiles = ExcelUtil.searchExcelFiles(targetDir);
+    File file = new File(targetDir);
+    if (file.isFile()) {
+      // 単一ファイル時
 
-    for (File targetFile : searchExcelFiles) {
-      String str = ExcelUtil.extractStringFromExcelBook(targetFile);
+      String str = ExcelUtil.extractStringFromExcelBook(file);
+      FileUtils.writeStringToFile(new File(outputDir, file.getName() + ".txt"), str, "utf-8");
 
-      String destFilePath = targetFile.getAbsolutePath().replace(targetDir, outputDir);
-      String parentPath = FilenameUtils.getFullPath(destFilePath);
-      File parent = new File(parentPath);
-      parent.mkdirs();
+    } else {
+      // ディレクトリ一括時
 
-      FileUtils.writeStringToFile(new File(parent, targetFile.getName() + ".txt"), str, "utf-8");
+      Collection<File> searchExcelFiles = ExcelUtil.searchExcelFiles(targetDir);
+      for (File targetFile : searchExcelFiles) {
+        String str = ExcelUtil.extractStringFromExcelBook(targetFile);
+
+        String destFilePath = targetFile.getAbsolutePath().replace(targetDir, outputDir);
+        String parentPath = FilenameUtils.getFullPath(destFilePath);
+        File parent = new File(parentPath);
+        parent.mkdirs();
+
+        FileUtils.writeStringToFile(new File(parent, targetFile.getName() + ".txt"), str, "utf-8");
+      }
     }
   }
 }
