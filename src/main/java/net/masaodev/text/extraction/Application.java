@@ -33,15 +33,16 @@ public class Application {
       // ディレクトリ一括時
 
       Collection<File> searchExcelFiles = ExcelUtil.searchExcelFiles(targetDir);
+      Runtime r = Runtime.getRuntime();
       for (File targetFile : searchExcelFiles) {
         String str = ExcelUtil.extractStringFromExcelBook(targetFile);
-
         String destFilePath = targetFile.getAbsolutePath().replace(targetDir, outputDir);
         String parentPath = FilenameUtils.getFullPath(destFilePath);
         File parent = new File(parentPath);
         parent.mkdirs();
 
         FileUtils.writeStringToFile(new File(parent, targetFile.getName() + ".txt"), str, "utf-8");
+        r.gc();
       }
     }
   }

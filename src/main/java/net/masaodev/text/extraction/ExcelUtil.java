@@ -37,6 +37,7 @@ public class ExcelUtil {
       inputStream = new FileInputStream(targetExcelBook);
       workbook = WorkbookFactory.create(inputStream);
       inputStream.close();
+      inputStream = null;
     } catch (EncryptedDocumentException | IOException e) {
       logger.error("Excelファイルが壊れている？:{}", targetExcelBook.getName());
       return "";
@@ -78,6 +79,7 @@ public class ExcelUtil {
         });
     try {
       workbook.close();
+      workbook = null;
     } catch (IOException e) {
       // TODO 自動生成された catch ブロック
       e.printStackTrace();
@@ -127,7 +129,7 @@ public class ExcelUtil {
           String.valueOf(charArray[offset - 1])
               + String.valueOf(charArray[aColNum - charSize * offset]);
     } else {
-      throw new IllegalArgumentException("範囲外のセルが指定されています。");
+      return "("+aRowNum+","+aColNum+")";
     }
     return String.format("%s%d", cellPos, aRowNum + 1);
   }
@@ -163,7 +165,11 @@ public class ExcelUtil {
       }
       // shapeの処理(XLS形式)
       if (d instanceof HSSFSimpleShape) {
-        s = ((HSSFSimpleShape) d).getString().getString();
+        try {
+          s = ((HSSFSimpleShape) d).getString().getString();
+        } catch (NullPointerException e) {
+          // NOP
+        }
       }
       // グループ化されたshapeの処理(XLSX形式)
       if (d instanceof XSSFShapeGroup) {
